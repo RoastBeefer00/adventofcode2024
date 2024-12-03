@@ -1,7 +1,7 @@
 use anyhow::Result;
 use std::fs::read_to_string;
 use nom::{
-    bytes::complete::{tag, take_until}, character::complete::{anychar, i32, line_ending, space0}, combinator::opt, multi::{many0, many1, many_till}, sequence::{delimited, preceded, terminated, tuple}, IResult
+    bytes::complete::tag, character::complete::{anychar, i32}, multi::{many1, many_till}, sequence::{delimited, preceded, tuple}, IResult
 };
 
 fn parse_line(input: &str) -> IResult<&str, Vec<(Vec<char>, (i32, i32))>> {
