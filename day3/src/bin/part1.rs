@@ -1,20 +1,13 @@
 use anyhow::Result;
 use std::fs::read_to_string;
 use nom::{
-    bytes::complete::{tag, take_until}, character::complete::{anychar, i32, line_ending, space0}, combinator::opt, multi::{many0, many1}, sequence::{delimited, preceded, terminated, tuple}, IResult
+    bytes::complete::{tag, take_until}, character::complete::{anychar, i32, line_ending, space0}, combinator::opt, multi::{many0, many1, many_till}, sequence::{delimited, preceded, terminated, tuple}, IResult
 };
 
-fn parse_line(input: &str) -> IResult<&str, Vec<(i32, i32)>> {
-    // let (input, _) = take_until(
-    //     delimited(
-    //         tag("mul("),
-    //         tuple((i32, preceded(tag(","), i32))),
-    //         tag(")")
-    //     )
-    // )(input);
+fn parse_line(input: &str) -> IResult<&str, Vec<(Vec<char>, (i32, i32))>> {
     many1(
-        preceded(
-            many0(anychar),
+        many_till(
+            anychar,
             delimited(
                 tag("mul("),
                 tuple((i32, preceded(tag(","), i32))),
@@ -26,6 +19,10 @@ fn parse_line(input: &str) -> IResult<&str, Vec<(i32, i32)>> {
 
 fn main() -> Result<()> {
     let input = read_to_string("input.txt")?;
+    let (_, r) = parse_line(&input).unwrap();
+    let nums = r.into_iter().map(|(_, tup)| tup).collect::<Vec<(i32, i32)>>();
+    let answer: i32 = nums.into_iter().map(|(num_one, num_two)| num_one * num_two).sum();
+    println!("{answer}");
     Ok(())
 }
 
@@ -41,15 +38,17 @@ mod tests {
         ];
         tests.into_iter().for_each(|(input, output)| {
             let (_, r) = parse_line(input).unwrap();
-            assert_eq!(output, r);
+            let nums = r.into_iter().map(|(_, tup)| tup).collect::<Vec<(i32, i32)>>();
+            assert_eq!(output, nums);
         });
     }
 
     #[test]
     fn test_example() -> Result<()> {
         let input = read_to_string("example.txt")?;
-        let (_, muls) = parse_line(&input).unwrap();
-        let answer: i32 = muls.into_iter().map(|(num_one, num_two)| num_one * num_two).sum();
+        let (_, r) = parse_line(&input).unwrap();
+        let nums = r.into_iter().map(|(_, tup)| tup).collect::<Vec<(i32, i32)>>();
+        let answer: i32 = nums.into_iter().map(|(num_one, num_two)| num_one * num_two).sum();
         assert_eq!(answer, 161);
         Ok(())
     }
