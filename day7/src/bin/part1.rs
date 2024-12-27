@@ -4,6 +4,7 @@ use nom::{
     bytes::complete::tag, character::complete::{i64, line_ending}, multi::many1, sequence::{preceded, terminated, tuple}, IResult
 };
 use itertools::Itertools;
+use rayon::prelude::*;
 
 fn process_line(input: &str) -> IResult<&str, (i64, Vec<i64>)> {
     tuple((
@@ -63,7 +64,7 @@ fn main() -> Result<()> {
     let input = read_to_string("input.txt")?;
     let (_, lines) = get_all_lines(&input).unwrap();
     let sum: i64 = lines
-        .into_iter()
+        .par_iter()
         .filter(|(result, nums)| {
             let mut operators = Vec::new();
             for _ in 0..nums.len() - 1 {
