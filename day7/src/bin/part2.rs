@@ -1,28 +1,28 @@
 use std::fs::read_to_string;
 use anyhow::Result;
 use nom::{
-    bytes::complete::tag, character::complete::{i64, line_ending}, multi::many1, sequence::{preceded, terminated, tuple}, IResult
+    bytes::complete::tag, character::complete::{i128, line_ending}, multi::many1, sequence::{preceded, terminated, tuple}, IResult
 };
 use itertools::Itertools;
 use rayon::prelude::*;
 
-fn process_line(input: &str) -> IResult<&str, (i64, Vec<i64>)> {
+fn process_line(input: &str) -> IResult<&str, (i128, Vec<i128>)> {
     tuple((
-        terminated(i64, tag(":")), 
+        terminated(i128, tag(":")), 
         many1(
             preceded(
                 tag(" "), 
-                i64
+                i128
             )
         )
     ))(input)
 }
 
-fn get_all_lines(input: &str) -> IResult<&str, Vec<(i64, Vec<i64>)>> {
+fn get_all_lines(input: &str) -> IResult<&str, Vec<(i128, Vec<i128>)>> {
     many1(terminated(process_line, line_ending))(input)
 }
 
-fn is_valid_combination(result: &i64, nums: &Vec<i64>, combination: Vec<&str>) -> bool {
+fn is_valid_combination(result: &i128, nums: &Vec<i128>, combination: Vec<&str>) -> bool {
     assert_eq!(nums.len() - 1, combination.len());
     let mut total = 0;
     combination.
@@ -45,7 +45,7 @@ fn is_valid_combination(result: &i64, nums: &Vec<i64>, combination: Vec<&str>) -
                         let first_str = first.to_string();
                         let second_str = second.to_string();
                         let combined_str = first_str + &second_str;
-                        total = combined_str.parse::<i64>().unwrap();
+                        total = combined_str.parse::<i128>().unwrap();
                     },
                     _ => {},
                 }
@@ -61,7 +61,7 @@ fn is_valid_combination(result: &i64, nums: &Vec<i64>, combination: Vec<&str>) -
                         let first_str = total.to_string();
                         let second_str = nums.get(i + 1).unwrap().to_string();
                         let combined_str = first_str + &second_str;
-                        total = combined_str.parse::<i64>().unwrap();
+                        total = combined_str.parse::<i128>().unwrap();
                     },
                     _ => {},
                 }
@@ -77,7 +77,7 @@ fn is_valid_combination(result: &i64, nums: &Vec<i64>, combination: Vec<&str>) -
 fn main() -> Result<()> {
     let input = read_to_string("input.txt")?;
     let (_, lines) = get_all_lines(&input).unwrap();
-    let sum: i64 = lines
+    let sum: i128 = lines
         .par_iter()
         .filter(|(result, nums)| {
             let mut operators = Vec::new();
@@ -110,7 +110,7 @@ mod tests {
     fn test_example_part_two() -> Result<()> {
         let input = read_to_string("example.txt")?;
         let (_, lines) = get_all_lines(&input).unwrap();
-        let sum: i64 = lines
+        let sum: i128 = lines
             .into_iter()
             .filter(|(result, nums)| {
                 let mut operators = Vec::new();
